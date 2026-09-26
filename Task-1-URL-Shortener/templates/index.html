@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Linkly - URL Shortener</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 650px;
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 24px;
+        padding: 45px 35px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    .logo {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 20px;
+        border-radius: 18px;
+        background: #667eea;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 32px;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.35);
+    }
+
+    h1 {
+        font-size: 38px;
+        margin-bottom: 10px;
+        color: #222;
+    }
+
+    .subtitle {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+
+    .input-container {
+        display: flex;
+        background: #f5f5f5;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 5px;
+        transition: 0.3s;
+    }
+
+    .input-container:focus-within {
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.15);
+    }
+
+    input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 15px;
+        font-size: 16px;
+        min-width: 0;
+    }
+
+    button {
+        border: none;
+        border-radius: 9px;
+        padding: 14px 22px;
+        background: #667eea;
+        color: white;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #5568d8;
+        transform: translateY(-1px);
+    }
+
+    button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .result {
+        display: none;
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 14px;
+        text-align: left;
+        animation: slideDown 0.3s ease;
+    }
+
+    .success-box {
+        background: #f0fff4;
+        border: 1px solid #b7ebc6;
+    }
+
+    .error-box {
+        background: #fff5f5;
+        border: 1px solid #ffcaca;
+    }
+
+    .result-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .success-text {
+        color: #238636;
+    }
+
+    .error-text {
+        color: #d93025;
+    }
+
+    .short-url-container {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .short-url {
+        flex: 1;
+        padding: 12px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        color: #667eea;
+        word-break: break-all;
+    }
+
+    .copy-btn {
+        background: #222;
+        padding: 12px 18px;
+    }
+
+    .copy-btn:hover {
+        background: #444;
+    }
+
+    .stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid #eee;
+    }
+
+    .stat {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 24px;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #777;
+        margin-top: 4px;
+    }
+
+    .loading {
+        display: none;
+    }
+
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid rgba(255,255,255,0.4);
+        border-top-color: white;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.7s linear infinite;
+        vertical-align: middle;
+        margin-right: 7px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 600px) {
+
+        .container {
+            padding: 35px 20px;
+        }
+
+        h1 {
+            font-size: 30px;
+        }
+
+        .input-container {
+            flex-direction: column;
+            background: transparent;
+            gap: 10px;
+        }
+
+        input {
+            background: #f5f5f5;
+            border-radius: 9px;
+        }
+
+        button {
+            width: 100%;
+        }
+
+        .short-url-container {
+            flex-direction: column;
+        }
+
+        .copy-btn {
+            width: 100%;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">🔗</div>
+
+    <h1>Linkly</h1>
+
+    <p class="subtitle">
+        Transform long URLs into short, simple and shareable links.
+    </p>
+
+    <div class="input-container">
+
+        <input
+            type="url"
+            id="urlInput"
+            placeholder="Paste your long URL here..."
+            autocomplete="off"
+        >
+
+        <button id="shortenBtn" onclick="shortenURL()">
+
+            <span id="buttonText">Shorten URL</span>
+
+            <span class="loading" id="loading">
+                <span class="spinner"></span>
+                Creating...
+            </span>
+
+        </button>
+
+    </div>
+
+    <div class="result" id="result">
+
+        <div class="result-title" id="message"></div>
+
+        <div class="short-url-container" id="shortUrlContainer">
+
+            <div class="short-url" id="shortUrl"></div>
+
+            <button class="copy-btn" onclick="copyURL()">
+                Copy
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="stat-number">⚡</div>
+            <div class="stat-label">Fast</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number">🔒</div>
+            <div class="stat-label">Simple</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number">🚀</div>
+            <div class="stat-label">Easy to Share</div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const urlInput = document.getElementById("urlInput");
+    const result = document.getElementById("result");
+    const message = document.getElementById("message");
+    const shortUrl = document.getElementById("shortUrl");
+    const shortenBtn = document.getElementById("shortenBtn");
+    const buttonText = document.getElementById("buttonText");
+    const loading = document.getElementById("loading");
+
+
+    async function shortenURL() {
+
+        const url = urlInput.value.trim();
+
+        result.style.display = "none";
+
+        if (!url) {
+
+            showError("Please enter a URL.");
+
+            urlInput.focus();
+
+            return;
+        }
+
+
+        shortenBtn.disabled = true;
+
+        buttonText.style.display = "none";
+        loading.style.display = "inline";
+
+
+        try {
+
+            const response = await fetch("/api/shorten", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    url: url
+                })
+
+            });
+
+
+            const data = await response.json();
+
+
+            if (!response.ok) {
+
+                showError(data.error || "Invalid URL.");
+
+                return;
+            }
+
+
+            const fullShortUrl =
+                window.location.origin + data.short_url;
+
+
+            message.textContent = "Your shortened URL is ready!";
+            message.className = "result-title success-text";
+
+
+            shortUrl.innerHTML = `
+                <a href="${fullShortUrl}"
+                   target="_blank"
+                   style="color:#667eea; text-decoration:none;">
+                    ${fullShortUrl}
+                </a>
+            `;
+
+
+            result.className = "result success-box";
+            result.style.display = "block";
+
+
+            urlInput.value = "";
+
+
+        } catch (error) {
+
+            showError(
+                "Unable to connect to the server. Please try again."
+            );
+
+        } finally {
+
+            shortenBtn.disabled = false;
+
+            buttonText.style.display = "inline";
+            loading.style.display = "none";
+
+        }
+
+    }
+
+
+    function showError(text) {
+
+        message.textContent = text;
+        message.className = "result-title error-text";
+
+        shortUrl.innerHTML = "";
+
+        result.className = "result error-box";
+
+        result.style.display = "block";
+
+    }
+
+
+    async function copyURL() {
+
+        const link = shortUrl.querySelector("a");
+
+        if (!link) {
+            return;
+        }
+
+
+        try {
+
+            await navigator.clipboard.writeText(link.href);
+
+            const copyButton =
+                document.querySelector(".copy-btn");
+
+            copyButton.textContent = "Copied ✓";
+
+
+            setTimeout(() => {
+                copyButton.textContent = "Copy";
+            }, 2000);
+
+
+        } catch (error) {
+
+            alert("Unable to copy the URL.");
+
+        }
+
+    }
+
+
+    urlInput.addEventListener("keypress", function(event) {
+
+        if (event.key === "Enter") {
+            shortenURL();
+        }
+
+    });
+
+</script>
+</body>
+</html>

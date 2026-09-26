@@ -1,0 +1,10 @@
+$kind: http-request
+name: 'Delete Menu Item - STAFF Test'
+url: 'http://localhost:5000/api/menu/5'
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc5MDM0MDk3MSwiZXhwIjoxNzkwNDI3MzcxfQ.ZhWhjEvfgvgZHXkNaPkPUlIVipXodoWEHXLxt2hKOCg'
+order: 3178282566122667

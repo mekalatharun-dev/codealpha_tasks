@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/accounts/login/
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"username\": \"api_employer\",\r
+
+    \    \"password\": \"Employer@123\"\r
+
+    }"
+order: 4503599624370322

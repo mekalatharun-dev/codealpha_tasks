@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  SERVED
+  CANCELLED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders       Order[]
+  reservations Reservation[]
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+
+  menuItems MenuItem[]
+}
+
+model MenuItem {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  available   Boolean  @default(true)
+  categoryId  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    Category              @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  ingredients MenuItemIngredient[]
+}
+model RestaurantTable {
+  id          Int         @id @default(autoincrement())
+  tableNumber Int         @unique
+  capacity    Int
+  status      TableStatus @default(AVAILABLE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  reservations Reservation[]
+  orders       Order[]
+}
+
+model Reservation {
+  id        Int               @id @default(autoincrement())
+  customerName String
+  customerPhone String
+  date      DateTime
+  guests    Int
+  status    ReservationStatus @default(PENDING)
+  tableId   Int
+  userId    Int?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  table RestaurantTable @relation(fields: [tableId], references: [id])
+  user  User?           @relation(fields: [userId], references: [id])
+
+  @@index([tableId, date])
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  status    OrderStatus @default(PENDING)
+  total     Decimal     @db.Decimal(10, 2)
+  tableId   Int?
+  userId    Int?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  table RestaurantTable? @relation(fields: [tableId], references: [id])
+  user  User?            @relation(fields: [userId], references: [id])
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(10, 2)
+  orderId    Int
+  menuItemId Int
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@unique([orderId, menuItemId])
+}
+
+model InventoryItem {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  quantity  Decimal  @db.Decimal(10, 3) @default(0)
+  unit      String
+  minStock  Decimal  @db.Decimal(10, 3) @default(10)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menuItems MenuItemIngredient[]
+}
+
+model MenuItemIngredient {
+  id              Int      @id @default(autoincrement())
+  quantityRequired Decimal @db.Decimal(10, 3)
+  menuItemId      Int
+  inventoryItemId Int
+
+  menuItem      MenuItem      @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+
+  @@unique([menuItemId, inventoryItemId])
+}

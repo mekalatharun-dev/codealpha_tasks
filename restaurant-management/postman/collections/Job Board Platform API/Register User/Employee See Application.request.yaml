@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://127.0.0.1:8000/api/accounts/login/
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"username\": \"technova_hr\",\r
+
+    \    \"password\": \"YOUR_EMPLOYER_PASSWORD\"\r
+
+    }"
+order: 4503599536108148

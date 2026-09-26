@@ -1,0 +1,5 @@
+$kind: http-request
+name: Login Candidate1
+url: ""
+method: GET
+order: 4491591456756549
